@@ -101,6 +101,7 @@ class BaseController extends Controller {
         foreach ($data as $item) {
             $link = url($item->getSelfLink());
             $item = $item->toArray();
+            unset($item['type']);
             $item['links']['self'] = $link;
             $items[] = $item;
         }

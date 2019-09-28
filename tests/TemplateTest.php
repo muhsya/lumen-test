@@ -18,6 +18,37 @@ class TemplateTest extends TestCase
     /**
     * @test
     */
+    public function test_should_return_all_template() {
+        $user = factory(User::class)->make();
+        $this->actingAs($user)->get('/checklists/templates', []);
+        $this->seeStatusCode(200);
+        $this->seeJsonStructure(
+            [
+                "meta" => [
+                    "count",
+                    "total"
+                ],
+                "links" => [
+                    "first",
+                    "last",
+                    "next",
+                    "prev"
+                ],
+                "data" => [
+                    [
+                        "name",
+                        "links" => [
+                            "self"
+                        ]
+                    ]
+                ]
+            ]
+        );
+    }
+
+    /**
+    * @test
+    */
     public function test_should_return_template_by_id() {
         $user = factory(User::class)->make();
         $this->actingAs($user)->get('/checklists/templates/2', []);
