@@ -147,13 +147,10 @@ class BaseController extends Controller {
         }
 
         if ($item == null) {
-            return response('Not Found', 404);
-            // $result = [
-            //     'status' => '404',
-            //     'error' => 'Not Found'
-            // ];
-
-            // return $result;
+            return [
+                'status' => '404',
+                'error' => 'Not Found'
+            ];
         }
 
         $attributes = [];
@@ -193,13 +190,10 @@ class BaseController extends Controller {
         $item = $this->model->find($id);
 
         if ($item == null) {
-            return response('Not Found', 404);
-            // $result = [
-            //     'status' => '404',
-            //     'error' => 'Not Found'
-            // ];
-
-            // return $result;
+            return [
+                'status' => '404',
+                'error' => 'Not Found'
+            ];
         }
 
         $item->update($param);
@@ -210,13 +204,10 @@ class BaseController extends Controller {
         $item = $this->model->find($id);
 
         if ($item == null) {
-            return response('Not Found', 404);
-            // $result = [
-            //     'status' => '404',
-            //     'error' => 'Not Found'
-            // ];
-
-            // return $result;
+            return [
+                'status' => '404',
+                'error' => 'Not Found'
+            ];
         }
 
         $result = $item->delete();

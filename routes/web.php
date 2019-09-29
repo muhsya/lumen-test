@@ -41,10 +41,10 @@ $router->group(['middleware' => 'auth'], function() use ($router) {
 
     $router->group(['prefix' => '/items'], function() use ($router) {
         $router->get('/', ['uses' => 'ItemController@index']);
+        $router->get('/summaries', ['uses' => 'ItemController@summaries']);
         $router->get('/{id}', ['uses' => 'ItemController@detail']);
         $router->post('/', ['uses' => 'ItemController@store']);
         $router->post('/{id}', ['uses' => 'ItemController@update']);
         $router->delete('/{id}', ['uses' => 'ItemController@delete']);
-        $router->get('/summaries', ['uses' => 'ItemController@summaries']);
     });
 });

@@ -28,6 +28,6 @@ class CreateTemplatesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('checklist_template');
+        Schema::dropIfExists('templates');
     }
 }
