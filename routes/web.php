@@ -45,5 +45,6 @@ $router->group(['middleware' => 'auth'], function() use ($router) {
         $router->post('/', ['uses' => 'ItemController@store']);
         $router->post('/{id}', ['uses' => 'ItemController@update']);
         $router->delete('/{id}', ['uses' => 'ItemController@delete']);
+        $router->get('/summaries', ['uses' => 'ItemController@summaries']);
     });
 });

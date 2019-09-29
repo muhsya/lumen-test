@@ -19,4 +19,8 @@ class ItemController extends BaseController {
 
         return $result;
     }
+
+    public function summaries(Request $request) {
+        $param = $request->all();
+    }
 }
