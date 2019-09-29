@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Checklist;
 use App\Models\Item;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Template;
+use App\Models\Checklist;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Model;
 
 class BaseController extends Controller {
     protected $model;
@@ -89,6 +90,11 @@ class BaseController extends Controller {
             $total = $this->model->count();
         }
 
+        $template = new Template;
+        if ($this->model instanceof $template) {
+            $query = $query->with(['checklist', 'items']);
+        }
+
         $data = $query->get();
 
         $firstUrl = $baseUrl . http_build_query($queryParam);
@@ -122,10 +128,16 @@ class BaseController extends Controller {
         $items = [];
         foreach ($data as $item) {
             $link = url($item->getSelfLink());
-            $item = $item->toArray();
-            unset($item['type']);
-            $item['links']['self'] = $link;
-            $items[] = $item;
+            $tmp = $item->toArray();
+            if ($this->model instanceof $template) {
+                $tmp['items'] = $item->checklist;
+                $tmp['checklist'] = $item->items;
+            }
+            
+            
+            unset($tmp['type']);
+            $tmp['links']['self'] = $link;
+            $items[] = $tmp;
         }
 
         $result['data'] = $items;
@@ -138,6 +150,11 @@ class BaseController extends Controller {
         $item = null;
         $result = [];
         $include = false;
+
+        $template = new Template;
+        if ($this->model instanceof $template) {
+            $item = $this->model->with(['checklist', 'items'])->find($id);
+        }
 
         if (!empty($param['include']) && $param['include'] == 'items') {
             $include = true;
@@ -165,6 +182,11 @@ class BaseController extends Controller {
             $attributes['items'] = $item->items;
         }
 
+        if ($this->model instanceof $template) {
+            $attributes['checklist'] = $item->checklist;
+            $attributes['items'] = $item->items;
+        }
+
         $result ['data'] = [
             'type' => $item->type,
             'id' => $item->id,
@@ -180,6 +202,22 @@ class BaseController extends Controller {
     public function store(Request $request) {
         $param = $request->all();
         $item = $this->model->create($param);
+        $template = new Template;
+        if ($this->model instanceof $template) {
+            if (!empty($param['checklist'])) {
+                $checklist = $param['checklist'];
+                $checklist['template_id'] = $item->id;
+                ChecklistTemplate::create($checklist);
+            }
+            
+            if (!empty($param['items'])) {
+                $items = $param['items'];
+                $items['template_id'] = $item->id;
+                foreach ($items as $dt) {
+                    ItemTemplate::create($dt);
+                }
+            }
+        }
 
         return $this->detail($request, $item->id);
     }

@@ -23,4 +23,36 @@ class ItemController extends BaseController {
     public function summaries(Request $request) {
         $param = $request->all();
     }
+
+    public function updateBulk(Request $request) {
+        $params = $request->all();
+
+        $itemResponse = [];
+        foreach ($params as $param) {
+            foreach ($param as $data) {
+                if (!empty($data['id']) && !empty($data['action']) && $data['action'] == 'update') {
+                    $id = $data['id'];
+                    $item = Item::find($id);
+                    $result = [
+                        "id" => $id,
+                        "action" => "update"
+                    ];
+
+                    if ($item != null) {
+                        $attributes = $data['attributes'];
+                        $item->update($attributes);
+                        $result['status'] = 200;
+                    } else {
+                        $result['status'] = 404;
+                    }
+
+                    $itemResponse[] = $result;
+                }
+            }
+        }
+        
+        return [
+            'data' => $itemResponse
+        ];
+    }
 }

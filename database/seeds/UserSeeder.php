@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
 
         $user->email = 'admin@email.com';
         $user->name = 'Admin App';
-        $user->token = $this->randomString(40);
+        $user->api_token = $this->randomString(40);
 
         $user->save();
     }

@@ -35,6 +35,7 @@ $router->group(['middleware' => 'auth'], function() use ($router) {
 
             $router->group(['prefix' => '/items'], function() use ($router) {
                 $router->get('/', ['uses' => 'ItemController@getByChecklist']);
+                $router->post('/_bulk', ['uses' => 'ItemController@updateBulk']);
             });
         });
     });
