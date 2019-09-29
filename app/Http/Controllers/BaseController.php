@@ -16,7 +16,6 @@ class BaseController extends Controller {
 
     public function index(Request $request, $parent = []) {
         $param = $request->all();
-        $query = $request->query();
 
         $baseUrl = $request->url() . '?';
 
@@ -28,46 +27,69 @@ class BaseController extends Controller {
             'page_offset' => $pageOffset
         ];
 
+        $query = $this->model->offset($pageOffset)->limit($pageLimit);
+
         if (!empty($param['filter'])) {
             $filter = $param['filter'];
+            $field = '';
+            $operator = '';
+            $value = '';
+            foreach ($filter as $key => $ops) {
+                $field = $key;
+                foreach ($ops as $op => $search) {
+                    $operator = $op;
+                    $value = $search;
+                }
+            }
+
+            if ($field != '' && $operator != '' && $value != '') {
+                if ($operator == 'between') {
+                    $value = explode(',', $value);
+                    $query = $query->where($field, '>=', $value[0])->where($field, '<=', $value[1]);
+                } else {
+                    $query = $query->where($field, $value);
+                }
+            }
+
             $queryParam['filter'] = $filter;
         }
 
-        if (!empty($param['short'])) {
-            $short = $param['short'];
-            $queryParam['short'] = $short;
-        }
+        if (!empty($param['sort'])) {
+            $sort = $param['sort'];
+            $queryParam['sort'] = $sort;
 
-        if (!empty($param['fields'])) {
-            $fields = $param['fields'];
-            $queryParam['fields'] = $fields;
+            if (strpos($sort, '-') === 0) {
+                $sort = str_replace('-', '', $sort);
+                $query = $query->orderBy($sort, 'desc');
+            } else {
+                $query = $query->orderBy($sort);
+            }
         }
 
         if (!empty($param['page_limit'])) {
             $pageLimit = $param['page_limit'];
+            $query = $query->limit($pageLimit);
             $queryParam['page_limit'] = $pageLimit;
         }
 
         if (!empty($param['page_offset'])) {
             $pageOffset = $param['page_offset'];
+            $query = $query->limit($pageOffset);
         }
 
-
-        $itemRelation = false;
         if (!empty($param['include']) && $param['include'] == 'items') {
-            $itemRelation = true;
-            $queryParam['include'] = $param['include'];
+            $query = $query->with('items');
         }
 
         $total = 0;
-        $data = [];
         if (count($parent) > 0) {
             $total = $this->model->where($parent['fieldName'], $parent['parent_id'])->count();
-            $data = $this->model->where($parent['fieldName'], $parent['parent_id'])->offset($pageOffset)->limit($pageLimit)->get();
+            $query = $query->where($parent['fieldName'], $parent['parent_id'])->offset($pageOffset)->limit($pageLimit);
         } else {
             $total = $this->model->count();
-            $data = $this->model->offset($pageOffset)->limit($pageLimit)->get();
         }
+
+        $data = $query->get();
 
         $firstUrl = $baseUrl . http_build_query($queryParam);
         $lastOffset = (int)($total / $pageLimit) * $pageLimit;
